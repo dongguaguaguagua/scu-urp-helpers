@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.5
+// @version      1.1.0
 // @description  Temporarily brought Standard GPA back. Also fix the academic menu's jump.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=scu.edu.cn
-// @require      http://zhjw.scu.edu.cn/js/jQuery/jquery-3.4.1.min.js
-// @require      http://zhjw.scu.edu.cn/assets/bootstrap/3.2.0/js/bootstrap.min.js
+// @grant        GM_addStyle
 // ==/UserScript==
 
 
@@ -111,7 +110,7 @@
                 altCcGpa = _altCcGpa;
                 document.getElementById('gpa').innerText = mainStdGpa.toFixed(2);
                 document.getElementById('gpaName').innerText = '主修标准GPA算法';
-                document.getElementById('courseNum').innerText = courseCount; // 教务系统会把补考、重修、复修等情况再计算一次，数据不正确，改成正确的数据
+                document.getElementById('courseNum').innerText = courseCount;
                 if(json['lnList'].length > 1){
                     isAlt = true;
                 }else{
@@ -132,9 +131,11 @@
             ['全部标准GPA算法', allStdGpa.toFixed(2), null],
             ['全部必修GPA算法', allCcGpa.toFixed(2), null]
         ];
+        var newNode = document.createElement("dialog");
+        newNode.id = "moeMoreGpaPanel";
         var cont = "<div class='modal-header no-padding'>\
                 <div class='table-header'>\
-                    <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>\
+                    <button type='button' class='close'>\
                         <span class='white'>×</span>\
                     </button>\
                     GPA成绩\
@@ -143,28 +144,38 @@
         cont += "<table class='table table-bordered table-hover'>";
         cont += "<thead><tr><th>GPA类型</th><th>GPA值</th></tr></thead>";
         cont += "<tbody>";
-        $.each(dat, function (i, v) {
+        for(let v of dat){
             cont += "<tr>";
             cont += "<td>" + v[0] + "</td><td>" + (v[1] == null ? "" : v[1]) + "</td>";
             cont += "</tr>";
-        });
+        }
         cont += "</tbody>";
         cont += "</table></div>";
-        $('#view-table .modal-content').html(cont);
-        $('#view-table .modal-content').css("max-height", "calc(100vh - 71px)");
-        $('#view-table .modal-content').css("overflow", "auto");
+        newNode.innerHTML = cont;
+        document.body.append(newNode);
+        moeMoreGpaPanel.showModal();
+        document.querySelector('#moeMoreGpaPanel').style.opacity = 1;
+        document.querySelector('#moeMoreGpaPanel').style.transform = "translateY(100%)";
+        var panelStyling = `
+            #moeMoreGpaPanel {
+                top: -130%;
+                width: 66%;
+                border: 1px solid #ccc;
+                padding: 0px;
+                opacity: 0;
+                transition: opacity 0.6s ease, transform 0.6s ease;
+            }
 
-        $('#view-table .modal-dialog').css('width', '50%');
-        $('#view-table').modal({
-            backdrop: 'static',
-            keyboard: false
-        }).on("hidden.bs.modal", function () {
-            $('#view-table .modal-dialog').css('width', '60%');
-            /*$("div").remove(".widget-box");*/
-            $(this).removeData("bs.modal");
-        });
-        $('.modal-backdrop').each(function () {
-            $(this).css('opacity', '0.5');
+            #moeMoreGpaPanel::backdrop {
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+        `
+        GM_addStyle(panelStyling);
+        document.querySelector('#moeMoreGpaPanel > div > div > button.close').addEventListener("click", ()=>{ 
+            // animate the dialog, flew away
+            document.querySelector('#moeMoreGpaPanel').style.opacity = 0;
+            document.querySelector('#moeMoreGpaPanel').style.transform = "translateY(0%)";
+            setTimeout(()=>{document.querySelector('#moeMoreGpaPanel').remove()}, 600);
         });
     };
 
