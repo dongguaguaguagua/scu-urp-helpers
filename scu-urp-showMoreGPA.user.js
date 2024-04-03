@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.1.0
+// @version      1.1.1
 // @description  Temporarily brought Standard GPA back. Also fix the academic menu's jump.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -14,8 +14,7 @@
     'use strict';
 
     try{
-        var _discard = learnInfo;
-        _discard = showMoreGPA;
+        learnInfo, showMoreGPA;
     }catch(e){
         return; // if the functions are not defined, return
     }
